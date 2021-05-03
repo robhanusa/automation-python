@@ -6,7 +6,10 @@ import sys
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus import Paragraph, Spacer, Table, Image
 from reportlab.lib.styles import getSampleStyleSheet
-
+from reportlab.lib import colors
+from email.message import EmailMessage
+import os.path
+import mimetypes
 
 def load_data(filename):
   """Loads the contents of filename as a JSON file."""
@@ -79,17 +82,42 @@ def main(argv):
   """Process the JSON data and generate a full report out of it."""
   data = load_data("car_sales.json")
   summary, sales_per_year = process_data(data)
-  print(summary)
+  #print(summary)
 
 
   # TODO: turn this into a PDF report
+  #title and body for pdf
   report = SimpleDocTemplate(r"C:\Users\rkhan\pythontest\courserafinalproject\cars.pdf")
   styles = getSampleStyleSheet()
-  summary =  Paragraph("A Complete Inventory of My Fruit", styles["h1"])
-  print(styles)
+  report_title = Paragraph("Sales summary for last month <br/><br/>", styles["h1"])
+  body =  Paragraph("{}<br/>{}<br/>{}<br/><br/>".format(summary[0],summary[1],summary[2]), styles["Normal"])
+  
+  #table for pdf
+  table_style = [('GRID', (0,0), (-1,-1), 1, colors.black)]
+  table = cars_dict_to_table(data)
+  report_table = Table(data=table, style=table_style, hAlign="LEFT")
+  
+  report.build([report_title, body, report_table])
 
   # TODO: send the PDF report as an email attachment
+  message = EmailMessage()
 
+  message['From'] = "automation@example.com"
+  message['To'] = “<user>@example.com”
+  message['Subject'] = 'Sales summary for last month'
+  msg_body = "{}\n{}\n{}".format(summary[0],summary[1],summary[2])
+  message.set_content(msg_body)
+  attachment_path = "/tmp/cars.pdf"
+  attachment_filename = os.path.basename(attachment_path)
+  mime_type, _ = mimetypes.guess_type(attachment_path)
+  mime_type, mime_subtype = mime_type.split('/', 1)
+  with open(attachment_path, 'rb') as ap:
+    message.add_attachment(ap.read(),
+    maintype=mime_type,
+    subtype=mime_subtype,
+    filename=os.path.basename(attachment_path))
+
+#didn't use emails.generate() or reports.generate()?
 
 if __name__ == "__main__":
   main(sys.argv)
