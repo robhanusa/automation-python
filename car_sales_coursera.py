@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import emails
 import json
 import locale
 import sys
@@ -103,7 +104,7 @@ def main(argv):
   message = EmailMessage()
 
   message['From'] = "automation@example.com"
-  message['To'] = “<user>@example.com”
+  message['To'] = “<user>@example.com” #need to fill in user
   message['Subject'] = 'Sales summary for last month'
   msg_body = "{}\n{}\n{}".format(summary[0],summary[1],summary[2])
   message.set_content(msg_body)
@@ -116,8 +117,8 @@ def main(argv):
     maintype=mime_type,
     subtype=mime_subtype,
     filename=os.path.basename(attachment_path))
+  emails.send(message)
 
-#didn't use emails.generate() or reports.generate()?
 
 if __name__ == "__main__":
   main(sys.argv)
