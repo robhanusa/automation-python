@@ -62,9 +62,8 @@ for file in os.listdir(file_path):
 with open('fruits.json', 'w') as fruits_json:
     json.dump(fruits_dict_list, fruits_json)
     
-#with open('fruits.json') as fruits_json:
-#    r = requests.post(http://[linux-instance-external-IP]/fruits, json = fruits_json)
-
+with open('fruits.json') as fruits_json:
+    r = requests.post('http://104.197.147.156/fruits', fruits_json)
 
 #below is the 4th part, reports.py
 from reportlab.platypus import SimpleDocTemplate
@@ -118,7 +117,7 @@ def main(argv):
 if __name__ == "__main__":
   main(sys.argv)
   
-'''
+
 
 #5th function, health_check.py
 import psutil
@@ -169,3 +168,145 @@ def main(argv):
         
 if __name__ == "__main__":
   main(sys.argv)
+  
+#actual code that works for #1:
+
+#!/usr/bin/env python3
+
+from PIL import Image
+import os
+import re
+
+image_path = r"supplier-data/images"
+
+pattern = r'(.+)(\.tiff)'
+permissions = 0o777
+
+for image in os.listdir(image_path):
+    #print(re.search(r'(.)(.{4}$)',image).groups()[1])
+    if re.search(r'(.)(.{4}$)',image).groups()[1] == 'tiff':
+        result = re.search(pattern,image)
+        im = Image.open(image_path+"/"+image)
+        rgb_im = im.convert('RGB') #.tiff is RGBA, and JPG only support RGB
+        rgb_im.resize((600,400)).save(image_path+"/"+"{}.jpeg".format(result.groups()[0]))
+        
+#actual code for 2nd part:
+    
+
+import requests
+from PIL import Image
+import os
+import re
+
+image_path = r"supplier-data/images"
+
+url = "http://localhost/upload/"
+for image in os.listdir(image_path):
+    if re.search(r'(.)(.{4}$)',image).groups()[1] == 'jpeg':
+        with open("supplier-data/images/"+image,'rb') as opened:
+            r = requests.post(url, files={'file': opened}) 
+            
+
+# actual code for #3.
+
+#!/usr/bin/env python3
+
+import os
+import requests
+import json
+import re
+
+file_path = r"supplier-data/descriptions"
+
+fruits_dict_list = []
+for file in os.listdir(file_path):
+    with open(file_path+'/'+file, 'r') as f:
+        fruits_dict = {}
+        description_list = []
+        for line in f:
+            description_list.append(line)
+        fruits_dict['name'] = description_list[0].strip()
+        weight_number = description_list[1].split( )
+        fruits_dict['weight'] = int(weight_number[0])
+        fruits_dict['description'] = description_list[2]
+        fruits_dict['image_name'] = re.search(r'^(\d+)\.txt$',file).groups()[0]+'.jpeg'
+        fruits_dict_list.append(fruits_dict)
+        r = requests.post('http://35.222.211.210/fruits/', json = fruits_dict)
+        print(r)
+
+#for 4th part, I won't know if all functions work until I try the last
+#what I have now for reports.py:
+    
+#!/usr/bin/env python3
+import os
+from reportlab.platypus import SimpleDocTemplate
+from reportlab.platypus import Paragraph, Spacer, Table, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+import datetime
+import json
+
+def generate_report():
+    today = datetime.date.today()
+
+    report = SimpleDocTemplate(r"/tmp/processed.pdf")
+    styles = getSampleStyleSheet()
+    report_title = Paragraph("Processed Update on {} <br/><br/>".format(today.strftime('%b %$
+
+    file_path = r"supplier-data/descriptions"
+
+    fruits_dict_list = []
+    for file in os.listdir(file_path):
+        with open(file_path+'/'+file, 'r') as f:
+            fruits_dict = {}
+            description_list = []
+            for line in f:
+                description_list.append(line)
+            fruits_dict['name'] = description_list[0].strip()
+            weight_number = description_list[1].split( )
+            fruits_dict['weight'] = int(weight_number[0])
+            fruits_dict_list.append(fruits_dict)
+
+    body_string = ""
+    for dict in fruits_dict_list:
+        body_string += "name: {} <br/>weight: {} lbs<br/><br/>".format(dict['name'],
+                                                                   dict['weight'])
+
+    body =  Paragraph(body_string, styles["Normal"])
+
+    report.build([report_title, body])
+
+#4.5: what I have so far for emails.py. It won't connect to local host
+#but, I think I need to just follow the directions better and make 3 functions
+
+#!/usr/bin/env python3
+from email.message import EmailMessage
+import sys
+import os
+import mimetypes
+import smtplib
+
+message = EmailMessage()
+
+message['From'] = "automation@example.com"
+message['To'] = "student-03-13f5b269a6b6@example.com" #need to fill in user
+message['Subject'] = 'Upload Completed - Online Fruit Store'
+msg_body = "All fruits are uploaded to our website successfully. A detailed list is attached$
+message.set_content(msg_body)
+attachment_path = "/tmp/processed.pdf"
+attachment_filename = os.path.basename(attachment_path)
+mime_type, _ = mimetypes.guess_type(attachment_path)
+mime_type, mime_subtype = mime_type.split('/', 1)
+with open(attachment_path, 'rb') as ap:
+  message.add_attachment(ap.read(),
+  maintype=mime_type,
+  subtype=mime_subtype,
+  filename=os.path.basename(attachment_path))
+
+mail_server = smtplib.SMTP('35.222.211.210')
+mail_server.send_message(message)
+mail_server.quit()
+
+#also look at: https://github.com/jjaw/Google-IT-automation-with-Python/blob/master/module7/week4/reports.py
+
+'''
