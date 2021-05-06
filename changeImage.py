@@ -136,38 +136,38 @@ memory_MB = psutil.virtual_memory().available//(1024**2)
 #get local host
 local_host = socket.gethostname()
 
-def main(argv):
-    message = EmailMessage()
+
+message = EmailMessage()
+
+message['From'] = "automation@example.com"
+message['To'] = “<user>@example.com” #need to fill in user
     
-    message['From'] = "automation@example.com"
-    message['To'] = “<user>@example.com” #need to fill in user
-        
-    if cpu_percent > 80:
-        message['Subject'] = 'Error - CPU usage is over 80%'
-        msg_body = "Please check your system and resolve the issue as soon as possible."
-        message.set_content(msg_body)
-        emails.send(message)
-        
-    if disk_space < 20:
-        message['Subject'] = 'Error - Available disk space is less than 20%'
-        msg_body = "Please check your system and resolve the issue as soon as possible."
-        message.set_content(msg_body)
-        emails.send(message)  
-        
-    if memory_MB < 500:
-        message['Subject'] = 'Error - Available memory is less than 500MB'
-        msg_body = "Please check your system and resolve the issue as soon as possible."
-        message.set_content(msg_body)
-        emails.send(message)  
+if cpu_percent > 80:
+    message['Subject'] = 'Error - CPU usage is over 80%'
+    msg_body = "Please check your system and resolve the issue as soon as possible."
+    message.set_content(msg_body)
+    emails.send(message)
     
-    if local_host == "127.0.0.1":
-        message['Subject'] = 'Error - localhost cannot be resolved to 127.0.0.1'
-        msg_body = "Please check your system and resolve the issue as soon as possible."
-        message.set_content(msg_body)
-        emails.send(message)  
+if disk_space < 20:
+    message['Subject'] = 'Error - Available disk space is less than 20%'
+    msg_body = "Please check your system and resolve the issue as soon as possible."
+    message.set_content(msg_body)
+    emails.send(message)  
+    
+if memory_MB < 500:
+    message['Subject'] = 'Error - Available memory is less than 500MB'
+    msg_body = "Please check your system and resolve the issue as soon as possible."
+    message.set_content(msg_body)
+    emails.send(message)  
+
+if local_host == "127.0.0.1":
+    message['Subject'] = 'Error - localhost cannot be resolved to 127.0.0.1'
+    msg_body = "Please check your system and resolve the issue as soon as possible."
+    message.set_content(msg_body)
+    emails.send(message)  
         
 if __name__ == "__main__":
-  main(sys.argv)
+
   
 #actual code that works for #1:
 
@@ -192,7 +192,7 @@ for image in os.listdir(image_path):
         
 #actual code for 2nd part:
     
-
+#!/usr/bin/env python3
 import requests
 from PIL import Image
 import os
@@ -246,7 +246,7 @@ from reportlab.lib import colors
 import datetime
 import json
 
-def generate_report():
+def generate_pdf():
     today = datetime.date.today()
 
     report = SimpleDocTemplate(r"/tmp/processed.pdf")
@@ -257,15 +257,16 @@ def generate_report():
 
     fruits_dict_list = []
     for file in os.listdir(file_path):
-        with open(file_path+'/'+file, 'r') as f:
-            fruits_dict = {}
-            description_list = []
-            for line in f:
-                description_list.append(line)
-            fruits_dict['name'] = description_list[0].strip()
-            weight_number = description_list[1].split( )
-            fruits_dict['weight'] = int(weight_number[0])
-            fruits_dict_list.append(fruits_dict)
+        if file.endswith('.txt')
+            with open(file_path+'/'+file, 'r') as f:
+                fruits_dict = {}
+                description_list = []
+                for line in f:
+                    description_list.append(line)
+                fruits_dict['name'] = description_list[0].strip()
+                weight_number = description_list[1].split( )
+                fruits_dict['weight'] = int(weight_number[0])
+                fruits_dict_list.append(fruits_dict)
 
     body_string = ""
     for dict in fruits_dict_list:
@@ -275,6 +276,9 @@ def generate_report():
     body =  Paragraph(body_string, styles["Normal"])
 
     report.build([report_title, body])
+    
+if __name__ == '__main__':
+    generate_pdf()
 
 #4.5: what I have so far for emails.py. It won't connect to local host
 #but, I think I need to just follow the directions better and make 3 functions
@@ -308,5 +312,5 @@ mail_server.send_message(message)
 mail_server.quit()
 
 #also look at: https://github.com/jjaw/Google-IT-automation-with-Python/blob/master/module7/week4/reports.py
-
+n
 '''
